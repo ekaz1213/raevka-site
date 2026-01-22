@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Вход — Посёлок Раевка</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header>
+    <h1>Посёлок Раевка</h1>
+    <nav>
+      <a href="index.html">На главную</a>
+    </nav>
+  </header>
+
+  <main>
+    <h2 style="text-align:center; margin:3rem 0 2rem;">Вход в систему</h2>
+
+    <form id="login-form">
+      <input type="email" id="email" placeholder="Email" required autocomplete="email" />
+      <input type="password" id="password" placeholder="Пароль" required autocomplete="current-password" />
+      <button type="submit" class="btn btn-primary" style="width:100%;">Войти</button>
+    </form>
+
+    <p style="text-align:center; margin-top:1.5rem;">
+      <a href="cabinet.html" id="register-link" style="color:#3b82f6; text-decoration:none;">Зарегистрироваться →</a>
+    </p>
+
+    <p id="error-msg" style="color:#ef4444; text-align:center; margin-top:1rem; min-height:1.5rem;"></p>
+  </main>
+
+  <script type="module">
+    import { auth, signInWithEmailAndPassword, onAuthStateChanged } from './js/firebase.js';
+    import './js/auth.js';
+
+    const loginForm = document.getElementById('login-form');
+    const errorMsg = document.getElementById('error-msg');
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        // Перенаправление после успешного входа
+        window.location.href = 'cabinet.html';
+      } catch (err) {
+        errorMsg.textContent = err.message.includes('wrong-password') ? 'Неверный пароль' :
+                               err.message.includes('user-not-found') ? 'Пользователь не найден' :
+                               'Ошибка входа: ' + err.message;
+      }
+    });
+
+    // Если уже залогинен — сразу в кабинет
+    onAuthStateChanged(auth, user => {
+      if (user) window.location.href = 'cabinet.html';
+    });
+  </script>
+</body>
+</html>
