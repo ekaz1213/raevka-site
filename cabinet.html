@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Личный кабинет — Посёлок Раевка</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header>
+    <h1>Посёлок Раевка</h1>
+    <nav>
+      <a href="index.html">Новости</a>
+      <a href="#" id="logout-btn" onclick="logout()" style="display:none;">Выйти</a>
+    </nav>
+  </header>
+
+  <main>
+    <h2 style="text-align:center; margin:3rem 0 2rem;">Личный кабинет</h2>
+
+    <!-- Панель Администратора -->
+    <div id="admin-panel">
+      <div class="card">
+        <h3>Админ-панель</h3>
+        <p>Здесь вы можете добавлять жителей, создавать новости и загружать документы.</p>
+        <button class="btn btn-primary" onclick="window.location.href='#add-user'">Добавить жителя</button>
+        <button class="btn btn-primary" onclick="window.location.href='#add-news'">Создать новость</button>
+        <button class="btn btn-primary" onclick="window.location.href='#upload-doc'">Загрузить документ</button>
+      </div>
+
+      <!-- Форма добавления жителя -->
+      <div class="card" id="add-user">
+        <h3>Добавить нового жителя</h3>
+        <form id="add-user-form">
+          <input type="text" id="fullName" placeholder="ФИО" required />
+          <input type="email" id="userEmail" placeholder="Email" required />
+          <input type="password" id="userPassword" placeholder="Пароль (минимум 6 символов)" required />
+          <select id="userRole" required>
+            <option value="">Выберите роль</option>
+            <option value="resident">Житель</option>
+            <option value="rkn">Глава РКН</option>
+          </select>
+          <button type="submit" class="btn btn-success">Добавить</button>
+        </form>
+        <p id="add-user-msg"></p>
+      </div>
+
+      <!-- Форма создания новости -->
+      <div class="card" id="add-news">
+        <h3>Создать новость</h3>
+        <form id="add-news-form">
+          <input type="text" id="newsTitle" placeholder="Заголовок новости" required />
+          <textarea id="newsText" rows="6" placeholder="Текст новости..." required></textarea>
+          <button type="submit" class="btn btn-success">Опубликовать</button>
+        </form>
+        <p id="news-msg"></p>
+      </div>
+
+      <!-- Загрузка документа -->
+      <div class="card" id="upload-doc">
+        <h3>Загрузить документ</h3>
+        <form id="upload-doc-form">
+          <input type="text" id="docTitle" placeholder="Название документа" required />
+          <input type="file" id="docFile" accept=".pdf,.doc,.docx,.jpg,.png" required />
+          <button type="submit" class="btn btn-primary">Загрузить</button>
+        </form>
+        <p id="doc-msg"></p>
+      </div>
+    </div>
+
+    <!-- Панель Главы РКН -->
+    <div id="rkn-panel">
+      <div class="card">
+        <h3>Проверка документов (РКН)</h3>
+        <div id="pending-docs-list"></div>
+      </div>
+    </div>
+
+    <!-- Панель простого жителя -->
+    <div id="resident-panel">
+      <div class="card">
+        <h3>Добро пожаловать!</h3>
+        <p>Вы можете просматривать новости посёлка на главной странице.</p>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { auth, db, collection, addDoc, serverTimestamp, getDocs, query, where, updateDoc, doc, ref, uploadBytes, getDownloadURL } from './js/firebase.js';
+    import './js/auth.js';
+    import './js/documents.js';
+    import './js/admin.js';
+
+    // Загрузка документов на проверку для РКН
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (document.getElementById('pending-docs-list')) {
+        await loadPendingDocuments();
+      }
+    });
+  </script>
+</body>
+</html>
