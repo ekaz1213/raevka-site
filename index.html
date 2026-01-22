@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Посёлок Раевка — официальный сайт</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header>
+    <h1>Посёлок Раевка</h1>
+    <nav>
+      <a href="index.html">Новости</a>
+      <a href="login.html">Вход</a>
+    </nav>
+  </header>
+
+  <main>
+    <h2 style="text-align:center; margin:2rem 0;">Последние новости</h2>
+    <div id="news-list"></div>
+  </main>
+
+  <script type="module">
+    import { db, collection, getDocs, query, orderBy } from './js/firebase.js';
+    import './js/news.js';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadPublicNews();
+    });
+  </script>
+</body>
+</html>
