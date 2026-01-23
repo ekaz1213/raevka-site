@@ -1,4 +1,4 @@
-// js/admin.js — исправленная версия без syntax ошибок
+// js/admin.js — финальная версия без syntax ошибок, без template literals
 import { auth, db, createUserWithEmailAndPassword, doc, setDoc, addDoc, serverTimestamp, collection, getDocs } from './firebase.js';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -26,14 +26,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const regNumber = await generateUniqueRegNumber();
 
         await setDoc(doc(db, "users", user.uid), {
-          fullName,
-          email,
-          regNumber,
-          role,
+          fullName: fullName,
+          email: email,
+          regNumber: regNumber,
+          role: role,
           createdAt: serverTimestamp()
         });
 
-        alert(Житель добавлен!\nEmail: ${email}\nРег. номер: ${regNumber});
+        alert('Житель добавлен!\nEmail: ' + email + '\nРег. номер: ' + regNumber);
         addUserForm.reset();
       } catch (err) {
         alert('Ошибка: ' + err.message);
@@ -49,8 +49,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       try {
         await addDoc(collection(db, "news"), {
-          title,
-          text,
+          title: title,
+          text: text,
           authorUid: auth.currentUser.uid,
           authorName: 'Администрация',
           createdAt: serverTimestamp()
@@ -77,6 +77,11 @@ async function generateUniqueRegNumber() {
   });
 
   do {
-    const p1 = String(Math.floor(10 + Math.random() * 90)).padStart(2, '0'); // 10-99
+    const p1 = String(Math.floor(10 + Math.random() * 90)).padStart(2, '0');
     const p2 = String(Math.floor(100000 + Math.random() * 900000)).padStart(6, '0');
-    const p3 =
+    const p3 = String(Math.floor(10 + Math.random() * 90)).padStart(2, '0');
+    num = p1 + '-' + p2 + '-' + p3;
+  } while (used.has(num));
+
+  return num;
+}
