@@ -1,58 +1,53 @@
-// js/documents.js
-import { db, storage, collection, addDoc, getDocs, query, where, updateDoc, doc, ref, uploadBytes, getDownloadURL, serverTimestamp } from './firebase.js';
+// js/documents.js — версия с ссылками (без файлов), без inline onclick
+import { db, collection, addDoc, getDocs, query, where, updateDoc, doc, serverTimestamp } from './firebase.js';
 
 const uploadForm = document.getElementById('upload-doc-form');
 const pendingList = document.getElementById('pending-docs-list');
+const docMsg = document.getElementById('doc-msg');
 
 if (uploadForm) {
   uploadForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const title = document.getElementById('docTitle').value.trim();
-    const file = document.getElementById('docFile').files[0];
+    const url = document.getElementById('docUrl').value.trim();
 
-    if (!file) {
-      alert('Выберите файл!');
+    if (!url.startsWith('http')) {
+      alert('Ссылка должна начинаться с http или https!');
       return;
     }
 
     try {
-      // Загрузка файла
-      const storageRef = ref(storage, documents/${Date.now()}_${file.name});
-      const snapshot = await uploadBytes(storageRef, file);
-      const fileUrl = await getDownloadURL(snapshot.ref);
-
-      // Сохранение в базу
       await addDoc(collection(db, "documents"), {
         title,
-        fileUrl,
+        url,
         status: 'new',
         uploadedBy: auth.currentUser.uid,
         uploadedByEmail: auth.currentUser.email,
         createdAt: serverTimestamp()
       });
 
-      alert('Документ загружен и ожидает проверки!');
+      docMsg.textContent = 'Документ успешно добавлен и ожидает проверки!';
       uploadForm.reset();
+      setTimeout(() => docMsg.textContent = '', 4000);
     } catch (err) {
-      alert('Ошибка загрузки: ' + err.message);
+      alert('Ошибка добавления: ' + err.message);
     }
   });
 }
 
-// Загрузка документов на проверку (для РКН)
+// Загрузка документов на проверку для РКН
 export async function loadPendingDocuments() {
   if (!pendingList) return;
 
-  pendingList.innerHTML = '<p>Загрузка документов на проверку...</p>';
+  pendingList.innerHTML = '<p style="text-align:center; color:#666;">Загрузка документов на проверке...</p>';
 
   try {
     const q = query(collection(db, "documents"), where("status", "==", "new"));
     const snapshot = await getDocs(q);
-
     pendingList.innerHTML = '';
 
     if (snapshot.empty) {
-      pendingList.innerHTML = '<p style="color:#666;">Нет документов на проверке</p>';
+      pendingList.innerHTML = '<p style="text-align:center; color:#666;">Нет документов на проверке</p>';
       return;
     }
 
@@ -60,25 +55,30 @@ export async function loadPendingDocuments() {
       const data = docSnap.data();
       const id = docSnap.id;
 
-      pendingList.innerHTML += 
-        <div class="card">
-          <h4>${data.title}</h4>
-          <p><small>Загружен: ${data.uploadedByEmail || '—'}</small></p>
-          <p>
-            <a href="${data.fileUrl}" target="_blank" class="btn btn-primary" style="margin-right:1rem;">Открыть документ</a>
-            <button class="btn btn-success" onclick="approveDocument('${id}')">Одобрить</button>
-            <button class="btn btn-danger" onclick="archiveDocument('${id}')">В архив</button>
-          </p>
-        </div>
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = 
+        <h4>${data.title}</h4>
+        <p><small>Добавил: ${data.uploadedByEmail || '—'} • ${data.createdAt?.toDate().toLocaleDateString('ru-RU') || '—'}</small></p>
+        <p>
+          <a href="${data.url}" target="_blank" class="btn btn-primary" style="margin-right:1rem;">Открыть документ</a>
+          <button class="btn btn-success approve-btn">Одобрить</button>
+          <button class="btn btn-warning archive-btn">В архив</button>
+        </p>
       ;
+
+      card.querySelector('.approve-btn').addEventListener('click', () => approveDocument(id));
+      card.querySelector('.archive-btn').addEventListener('click', () => archiveDocument(id));
+
+      pendingList.appendChild(card);
     });
   } catch (err) {
-    pendingList.innerHTML = '<p style="color:#ef4444;">Ошибка загрузки</p>';
+    pendingList.innerHTML = '<p style="color:#ef4444; text-align:center;">Ошибка загрузки</p>';
     console.error(err);
   }
 }
 
-window.approveDocument = async function(id) {
+async function approveDocument(id) {
   if (!confirm('Одобрить документ?')) return;
   try {
     await updateDoc(doc(db, "documents", id), {
@@ -87,21 +87,23 @@ window.approveDocument = async function(id) {
       checkedAt: serverTimestamp()
     });
     alert('Документ одобрен!');
+    pendingList.innerHTML = '';
     loadPendingDocuments();
   } catch (err) {
     alert('Ошибка: ' + err.message);
   }
-};
+}
 
-window.archiveDocument = async function(id) {
+async function archiveDocument(id) {
   if (!confirm('Отправить в архив?')) return;
   try {
     await updateDoc(doc(db, "documents", id), {
       status: 'archived'
     });
     alert('Документ в архиве');
+    pendingList.innerHTML = '';
     loadPendingDocuments();
   } catch (err) {
     alert('Ошибка: ' + err.message);
   }
-};
+}
