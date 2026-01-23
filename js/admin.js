@@ -79,9 +79,4 @@ async function generateUniqueRegNumber() {
   do {
     const p1 = String(Math.floor(10 + Math.random() * 90)).padStart(2, '0'); // 10-99
     const p2 = String(Math.floor(100000 + Math.random() * 900000)).padStart(6, '0');
-    const p3 = String(Math.floor(10 + Math.random() * 90)).padStart(2, '0');
-    num = p1 + '-' + p2 + '-' + p3;
-  } while (used.has(num));
-
-  return num;
-}
+    const p3 =
