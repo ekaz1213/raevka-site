@@ -1,5 +1,5 @@
-// js/admin.js
-import { auth, db, createUserWithEmailAndPassword, doc, setDoc, addDoc, serverTimestamp, collection } from './firebase.js';
+// js/admin.js — исправленная версия без syntax ошибок
+import { auth, db, createUserWithEmailAndPassword, doc, setDoc, addDoc, serverTimestamp, collection, getDocs } from './firebase.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   const addUserForm = document.getElementById('add-user-form');
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        // Генерация уникального номера XX-XXXXXX-XX
+        // Генерация уникального номера
         const regNumber = await generateUniqueRegNumber();
 
         await setDoc(doc(db, "users", user.uid), {
@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
           title,
           text,
           authorUid: auth.currentUser.uid,
-          authorName: 'Администрация', // можно подтянуть имя
+          authorName: 'Администрация',
           createdAt: serverTimestamp()
         });
         alert('Новость опубликована!');
@@ -69,7 +69,7 @@ async function generateUniqueRegNumber() {
   let num;
   const used = new Set();
 
-  // Собираем существующие номера (для простоты — загружаем все, при 100 юзерах ок)
+  // Собираем существующие номера
   const usersSnap = await getDocs(collection(db, "users"));
   usersSnap.forEach(d => {
     const r = d.data().regNumber;
@@ -77,10 +77,10 @@ async function generateUniqueRegNumber() {
   });
 
   do {
-    const p1 = String(Math.floor(10 + Math.random() * 90)); // 10-99
+    const p1 = String(Math.floor(10 + Math.random() * 90)).padStart(2, '0'); // 10-99
     const p2 = String(Math.floor(100000 + Math.random() * 900000)).padStart(6, '0');
-    const p3 = String(Math.floor(10 + Math.random() * 90));
-    num = ${p1}-${p2}-${p3};
+    const p3 = String(Math.floor(10 + Math.random() * 90)).padStart(2, '0');
+    num = p1 + '-' + p2 + '-' + p3;
   } while (used.has(num));
 
   return num;
