@@ -1,5 +1,5 @@
-// js/documents.js — версия с ссылками, без inline JS
-import { db, collection, addDoc, getDocs, query, where, updateDoc, doc, serverTimestamp } from './firebase.js';
+// js/documents.js — исправленная версия с ссылками, без inline JS
+import { auth, db, collection, addDoc, getDocs, query, where, updateDoc, doc, serverTimestamp } from './firebase.js';
 
 const uploadForm = document.getElementById('upload-doc-form');
 const pendingList = document.getElementById('pending-docs-list');
@@ -52,22 +52,24 @@ export async function loadPendingDocuments() {
         <h4>${data.title}</h4>
         <p><small>Добавил: ${data.uploadedByEmail || '—'}</small></p>
         <p>
-          <a href="${data.url}" target="_blank" class="btn btn-primary" style="margin-right:1rem;">Открыть</a>
+          <a href="${data.url}" target="_blank" class="btn btn-primary" style="margin-right:1rem;">Открыть документ</a>
           <button class="btn btn-success approve-btn">Одобрить</button>
           <button class="btn btn-danger archive-btn">В архив</button>
         </p>
       ;
 
       card.querySelector('.approve-btn').addEventListener('click', () => {
-        if (confirm('Одобрить?')) {
+        if (confirm('Одобрить документ?')) {
           updateDoc(doc(db, "documents", id), { status: 'approved' });
+          pendingList.innerHTML = '';
           loadPendingDocuments();
         }
       });
 
       card.querySelector('.archive-btn').addEventListener('click', () => {
-        if (confirm('В архив?')) {
+        if (confirm('Отправить в архив?')) {
           updateDoc(doc(db, "documents", id), { status: 'archived' });
+          pendingList.innerHTML = '';
           loadPendingDocuments();
         }
       });
@@ -75,6 +77,7 @@ export async function loadPendingDocuments() {
       pendingList.appendChild(card);
     });
   } catch (err) {
+    pendingList.innerHTML = '<p style="color:red; text-align:center;">Ошибка загрузки</p>';
     console.error(err);
   }
 }
