@@ -52,7 +52,7 @@ export async function loadPendingDocuments() {
         <h4>${data.title}</h4>
         <p><small>Добавил: ${data.uploadedByEmail || '—'}</small></p>
         <p>
-          <a href="${data.url}" target="_blank" class="btn btn-primary" style="margin-right:1rem;">Открыть документ</a>
+          <a href="${data.url}" target="_blank" class="btn btn-primary" style="margin-right:1rem;">Открыть</a>
           <button class="btn btn-success approve-btn">Одобрить</button>
           <button class="btn btn-danger archive-btn">В архив</button>
         </p>
