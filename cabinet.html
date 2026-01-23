@@ -22,10 +22,10 @@
     <div id="admin-panel">
       <div class="card">
         <h3>Админ-панель</h3>
-        <p>Здесь вы можете добавлять жителей, создавать новости и загружать документы.</p>
+        <p>Здесь вы можете добавлять жителей, создавать новости и добавлять документы по ссылке.</p>
         <button class="btn btn-primary" onclick="window.location.href='#add-user'">Добавить жителя</button>
         <button class="btn btn-primary" onclick="window.location.href='#add-news'">Создать новость</button>
-        <button class="btn btn-primary" onclick="window.location.href='#upload-doc'">Загрузить документ</button>
+        <button class="btn btn-primary" onclick="window.location.href='#upload-doc'">Добавить документ</button>
       </div>
 
       <!-- Форма добавления жителя -->
@@ -56,13 +56,13 @@
         <p id="news-msg"></p>
       </div>
 
-      <!-- Загрузка документа -->
+      <!-- Добавление документа по ссылке -->
       <div class="card" id="upload-doc">
-        <h3>Загрузить документ</h3>
+        <h3>Добавить документ по ссылке</h3>
         <form id="upload-doc-form">
           <input type="text" id="docTitle" placeholder="Название документа" required />
-          <input type="file" id="docFile" accept=".pdf,.doc,.docx,.jpg,.png" required />
-          <button type="submit" class="btn btn-primary">Загрузить</button>
+          <input type="url" id="docUrl" placeholder="Ссылка на документ (Google Drive, Яндекс.Диск и т.д.)" required />
+          <button type="submit" class="btn btn-primary">Добавить</button>
         </form>
         <p id="doc-msg"></p>
       </div>
@@ -86,12 +86,11 @@
   </main>
 
   <script type="module">
-    import { auth, db, collection, addDoc, serverTimestamp, getDocs, query, where, updateDoc, doc, ref, uploadBytes, getDownloadURL } from './js/firebase.js';
+    import { auth, db, collection, addDoc, serverTimestamp, getDocs, query, where, updateDoc, doc } from './js/firebase.js';
     import './js/auth.js';
-    import './js/documents.js';
+    import { loadPendingDocuments } from './js/documents.js';
     import './js/admin.js';
 
-    // Загрузка документов на проверку для РКН
     document.addEventListener('DOMContentLoaded', async () => {
       if (document.getElementById('pending-docs-list')) {
         await loadPendingDocuments();
